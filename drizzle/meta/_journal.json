@@ -2,40 +2,11 @@
   "version": "7",
   "dialect": "sqlite",
   "entries": [
-    {
-      "idx": 0,
-      "version": "6",
-      "when": 1786718213619,
-      "tag": "0000_moaning_infant_terrible",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "6",
-      "when": 1786735954917,
-      "tag": "0001_polite_kitty_pryde",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "6",
-      "when": 1786742052944,
-      "tag": "0002_furry_demogoblin",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "6",
-      "when": 1786798895887,
-      "tag": "0003_light_doctor_faustus",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "6",
-      "when": 1788197332998,
-      "tag": "0004_warm_taskmaster",
-      "breakpoints": true
-    }
+    { "idx": 0, "version": "6", "when": 1786718213619, "tag": "0000_moaning_infant_terrible", "breakpoints": true },
+    { "idx": 1, "version": "6", "when": 1786735954917, "tag": "0001_polite_kitty_pryde", "breakpoints": true },
+    { "idx": 2, "version": "6", "when": 1786742052944, "tag": "0002_furry_demogoblin", "breakpoints": true },
+    { "idx": 3, "version": "6", "when": 1786798895887, "tag": "0003_light_doctor_faustus", "breakpoints": true },
+    { "idx": 4, "version": "6", "when": 1788197332998, "tag": "0004_warm_taskmaster", "breakpoints": true },
+    { "idx": 5, "version": "6", "when": 1794076800000, "tag": "0005_premium_matches", "breakpoints": true }
   ]
 }

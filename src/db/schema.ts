@@ -12,6 +12,7 @@ export const users = sqliteTable("users", {
   langFilter: text("lang_filter"),
   isActive: integer("is_active").notNull().default(1),
   isFake: integer("is_fake").notNull().default(0),
+  isPremium: integer("is_premium").notNull().default(0),
   lastActiveAt: integer("last_active_at").notNull(),
   lastLikeNotifAt: integer("last_like_notif_at"),
   lastCardUserId: integer("last_card_user_id"),
@@ -42,6 +43,7 @@ export const likes = sqliteTable(
   (table) => [uniqueIndex("likes_from_to_unique").on(table.fromUser, table.toUser)],
 );
 
+
 export const skips = sqliteTable(
   "skips",
   {
@@ -61,6 +63,7 @@ export const matches = sqliteTable(
     userB: integer("user_b").notNull(),
     revealedA: integer("revealed_a").notNull().default(0),
     revealedB: integer("revealed_b").notNull().default(0),
+    premiumOwnerId: integer("premium_owner_id"),
     createdAt: integer("created_at").notNull(),
   },
   (table) => [uniqueIndex("matches_pair_unique").on(table.userA, table.userB)],

@@ -229,27 +229,26 @@ export async function hasReciprocalLike(
 export async function insertMatch(db: Db, userX: number, userY: number): Promise<MatchRecord | null> {
   const userA = Math.min(userX, userY);
   const userB = Math.max(userX, userY);
-  const existing = await db
-    .select()
-    .from(matches)
-    .where(and(eq(matches.userA, userA), eq(matches.userB, userB)))
-    .get();
-  if (existing) return null;
-  try {
-    await db.insert(matches).values({
-      userA,
-      userB,
-      createdAt: now(),
-    });
-  } catch {
-    return null;
+  const existing = await db.select().from(matches).where(and(eq(matches.userA, userA), eq(matches.userB, userB))).get();
+  if (existing) {
+    // A later reciprocal like upgrades a one-sided Premium match to a regular mutual match.
+    if (existing.premiumOwnerId === null) return null;
+    await db.update(matches).set({ premiumOwnerId: null }).where(eq(matches.id, existing.id));
+    return (await db.select().from(matches).where(eq(matches.id, existing.id)).get()) ?? null;
   }
-  const created = await db
-    .select()
-    .from(matches)
-    .where(and(eq(matches.userA, userA), eq(matches.userB, userB)))
-    .get();
-  return created ?? null;
+  try {
+    await db.insert(matches).values({ userA, userB, createdAt: now(), premiumOwnerId: null });
+  } catch { return null; }
+  return (await db.select().from(matches).where(and(eq(matches.userA, userA), eq(matches.userB, userB))).get()) ?? null;
+}
+
+export async function insertPremiumMatch(db: Db, ownerId: number, otherId: number): Promise<MatchRecord | null> {
+  const userA = Math.min(ownerId, otherId);
+  const userB = Math.max(ownerId, otherId);
+  try {
+    await db.insert(matches).values({ userA, userB, premiumOwnerId: ownerId, createdAt: now() });
+  } catch { return null; }
+  return (await db.select().from(matches).where(and(eq(matches.userA, userA), eq(matches.userB, userB))).get()) ?? null;
 }
 
 export async function setMatchRevealed(
@@ -270,7 +269,7 @@ export async function listMatchesForUser(
   const rows = await db
     .select()
     .from(matches)
-    .where(or(eq(matches.userA, userId), eq(matches.userB, userId)))
+    .where(or(and(isNull(matches.premiumOwnerId), or(eq(matches.userA, userId), eq(matches.userB, userId))), eq(matches.premiumOwnerId, userId)))
     .all();
   const result: { match: MatchRecord; other: UserRecord; meIsA: boolean }[] = [];
   for (const match of rows) {
@@ -359,4 +358,14 @@ export function isProfileComplete(
     user.gender !== null &&
     snippetCount > 0
   );
+}
+
+
+export async function hasSkipped(db: Db, fromUser: number, toUser: number): Promise<boolean> {
+  const row = await db
+    .select({ id: skips.id })
+    .from(skips)
+    .where(and(eq(skips.fromUser, fromUser), eq(skips.toUser, toUser)))
+    .get();
+  return row !== undefined;
 }

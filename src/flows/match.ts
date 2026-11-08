@@ -7,6 +7,7 @@ import {
   hasReciprocalLike,
   insertEvent,
   insertMatch,
+  insertPremiumMatch,
   isOnboarding,
   listMatchesForUser,
   claimLikeDigest,
@@ -123,6 +124,19 @@ export async function processNewLike(
     return true;
   }
 
+  if (fromUser.isPremium === 1) {
+    const created = await insertPremiumMatch(ctx.db, fromUser.id, toUserId);
+    if (!created) return false;
+    await insertEvent(ctx.db, fromUser.id, "match");
+    await setBrowseState(ctx.db, fromUser.id, "home", null);
+    const nowMs = Date.now();
+    const ownerIsA = created.userA === fromUser.id;
+    await revealIfPossible(ctx.api, ctx.db, created, fromUser, toUser, ownerIsA, nowMs);
+    if (!toUser.username) await sendPending(ctx.api, ctx.db, fromUser, "matchPendingViewer");
+    if (!fromUser.username) await sendPending(ctx.api, ctx.db, fromUser, "matchPendingOther");
+    return true;
+  }
+
   const digest = ctx.executionCtx.waitUntil(
     (async () => {
       const claimed = await claimLikeDigest(ctx.db, toUserId);
@@ -147,7 +161,6 @@ export async function flushPendingReveals(ctx: MatchContext): Promise<void> {
   const nowMs = Date.now();
   for (const { match, other, meIsA } of pairs) {
     await revealIfPossible(ctx.api, ctx.db, match, me, other, meIsA, nowMs);
-    await revealIfPossible(ctx.api, ctx.db, match, other, me, !meIsA, nowMs);
   }
 }
 
